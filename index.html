@@ -1,1 +1,78 @@
-My GitHub Page
+<html>
+  <head>
+    <title>Wanderstreets</title>
+    <link rel="stylesheet" href="leaflet/leaflet.css" />
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="leaflet/leaflet.ie.css" />
+    <![endif]-->
+    <script src="leaflet/leaflet.js"></script>
+
+  </head>
+  <body style="padding: 0; margin: 0;">
+
+    <div id="map" style="height: 100%; margin: 0;"></div>
+
+    <div style="left: 50%; top: 50%; width: 10px; height: 10px; background-color: black; z-index: 2; position: absolute; border-radius: 5px;">.</div>
+
+    <script>
+        var map = new L.Map('map', {
+          zoomControl: false,
+          dragging: false,
+          touchZoom: false,
+          scrollWheelZoom: false,
+          doubleClickZoom: false
+        });
+
+        var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
+          cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
+          cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttribution});
+
+        var latitude = 53.4105878;
+        var longtide = -1.8306496;
+        var nodeId = 41119492;
+        var nodeNumber = 1;
+        var wayId = 4340380;
+
+        map.setView(new L.LatLng(latitude, longtide), 15).addLayer(cloudmade);
+
+        var t = setTimeout("move()", 250);
+
+        xmlhttp=new XMLHttpRequest();
+        xmlhttp.open("GET","http://www.openstreetmap.org/api/0.6/way/" + wayId,false);
+        xmlhttp.send();
+        xmlDoc=xmlhttp.responseXML;
+
+        var nodes_count = xmlDoc.getElementsByTagName("nd").length;
+
+        function move() {
+
+          var node_ref = xmlDoc.getElementsByTagName("nd")[nodeNumber].getAttribute("ref");
+
+          var node_request = new XMLHttpRequest();
+
+          var node_url = "http://www.openstreetmap.org/api/0.6/node/" + node_ref
+          console.log(node_url);
+          node_request.open("GET", node_url,false);
+          node_request.send();
+          nodeXml = node_request.responseXML;
+
+          var new_lat = nodeXml.getElementsByTagName("node")[0].getAttribute("lat");
+          var new_lon = nodeXml.getElementsByTagName("node")[0].getAttribute("lon");
+
+          nodeNumber = nodeNumber + 1;
+
+          map.panTo(new L.LatLng(new_lat, new_lon));
+
+          if (nodeNumber >= nodes_count) {
+            console.log('stop');
+          } else {
+            var t = setTimeout("move()", 250);
+          }
+
+
+        }
+
+      </script>
+
+  </body>
+</html>
