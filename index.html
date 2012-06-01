@@ -23,38 +23,35 @@
           doubleClickZoom: false
         });
 
-        var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
-          cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
-          cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttribution});
+        var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png';
 
-        var latitude = 53.4105878;
-        var longtide = -1.8306496;
-        var nodeId = 41119492;
-        var nodeNumber = 1;
-        var wayId = 114425884;
+        var cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade';
 
-        map.setView(new L.LatLng(latitude, longtide), 16).addLayer(cloudmade);
+        var cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttribution});
 
+        map.setView(new L.LatLng(50, -1), 16).addLayer(cloudmade);
+
+        var way_id = 39594610;
+        var node_number = 1;
 
         xmlhttp=new XMLHttpRequest();
-        xmlhttp.open("GET","http://www.openstreetmap.org/api/0.6/way/" + wayId,false);
+        xmlhttp.open("GET","http://www.openstreetmap.org/api/0.6/way/" + way_id,false);
         xmlhttp.send();
         xmlDoc=xmlhttp.responseXML;
 
         var nodes_count = xmlDoc.getElementsByTagName("nd").length;
-        var node_ref = xmlDoc.getElementsByTagName("nd")[nodeNumber].getAttribute("ref");
-        console.log(node_ref);
+        var node_id = xmlDoc.getElementsByTagName("nd")[node_number].getAttribute("ref");
 
         var t = setTimeout("move()", 250);
 
         function move() {
 
-          var node_ref = xmlDoc.getElementsByTagName("nd")[nodeNumber].getAttribute("ref");
-          console.log("On node " + nodeNumber + " of " + nodes_count + " (" + node_ref + " on way " + wayId + ")");
+          var node_id = xmlDoc.getElementsByTagName("nd")[node_number].getAttribute("ref");
+          console.log("On node " + node_number + " of " + nodes_count + " (" + node_id + " on way " + way_id + ")");
 
           var node_request = new XMLHttpRequest();
 
-          var node_url = "http://www.openstreetmap.org/api/0.6/node/" + node_ref;
+          var node_url = "http://www.openstreetmap.org/api/0.6/node/" + node_id;
           node_request.open("GET", node_url,false);
           node_request.send();
           nodeXml = node_request.responseXML;
@@ -62,52 +59,45 @@
           var new_lat = nodeXml.getElementsByTagName("node")[0].getAttribute("lat");
           var new_lon = nodeXml.getElementsByTagName("node")[0].getAttribute("lon");
 
-          nodeNumber = nodeNumber + 1;
+          node_number = node_number + 1;
 
           map.panTo(new L.LatLng(new_lat, new_lon));
 
-          if (nodeNumber >= nodes_count) {
+          if (node_number >= nodes_count) {
 
             console.log("looking for a new way to switch to");
 
             var otherWaysRequest = new XMLHttpRequest();
 
-            var other_ways_url = "http://www.openstreetmap.org/api/0.6/node/" + node_ref + "/ways";
-            console.log(other_ways_url);
+            var other_ways_url = "http://www.openstreetmap.org/api/0.6/node/" + node_id + "/ways";
             otherWaysRequest.open("GET", other_ways_url,false);
             otherWaysRequest.send();
             var otherWaysXml = otherWaysRequest.responseXML;
 
             var waysCount = otherWaysXml.getElementsByTagName("ways").length;
-            console.log(waysCount)
 
             var first_way_id = otherWaysXml.getElementsByTagName("way")[0].getAttribute("id");
 
-            console.log(first_way_id + " " + wayId);
-            if (parseInt(first_way_id) == wayId) {
+            if (parseInt(first_way_id) == way_id) {
               console.log("first node is existing one. Trying second.");
-              wayId = otherWaysXml.getElementsByTagName("way")[1].getAttribute("id");
+              way_id = otherWaysXml.getElementsByTagName("way")[1].getAttribute("id");
             } else {
-              wayId = first_way_id;
-
+              way_id = first_way_id;
             }
-              nodeNumber = 1;
-              console.log("switching to way " + wayId);
+              node_number = 1;
+              console.log("switching to way " + way_id);
               xmlhttp=new XMLHttpRequest();
 
-              var way_url ="http://www.openstreetmap.org/api/0.6/way/" + wayId
-              console.log(way_url);
-              xmlhttp.open("GET",way_url,false);
+              var way_url ="http://www.openstreetmap.org/api/0.6/way/" + way_id
+              xmlhttp.open("GET", way_url, false);
               xmlhttp.send();
               xmlDoc=xmlhttp.responseXML;
               nodes_count = xmlDoc.getElementsByTagName("nd").length;
 
               var t = setTimeout("move()", 250);
 
-//            var t = setTimeout("move()", 250);
-
           } else {
-            var node_ref = xmlDoc.getElementsByTagName("nd")[nodeNumber].getAttribute("ref");
+            var node_ref = xmlDoc.getElementsByTagName("nd")[node_number].getAttribute("ref");
 
             var t = setTimeout("move()", 250);
           }
