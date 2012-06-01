@@ -23,13 +23,13 @@
           doubleClickZoom: false
         });
 
-        var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png';
+        var tiles_url = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png';
 
-        var cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade';
+        var attribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade';
 
-        var cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttribution});
+        var map_layer = new L.TileLayer(tiles_url, {maxZoom: 18, attribution: attribution});
 
-        map.setView(new L.LatLng(50, -1), 16).addLayer(cloudmade);
+        map.setView(new L.LatLng(50, -1), 16).addLayer(map_layer);
 
         var way_id = 39594610;
         var node_number = 1;
